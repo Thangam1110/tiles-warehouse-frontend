@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://tiles-warehouse-backend-5.onrender.com/tiles";
+const API_URL = "/tiles";
 
 export const getAllTiles = () => axios.get(API_URL);
 export const addTile = (tile) => axios.post(API_URL, tile);
