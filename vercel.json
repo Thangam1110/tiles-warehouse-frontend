@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/tiles",
+      "destination": "https://tiles-warehouse-backend-5.onrender.com/tiles"
+    },
+    {
+      "source": "/tiles/:path*",
+      "destination": "https://tiles-warehouse-backend-5.onrender.com/tiles/:path*"
+    }
+  ]
+}
