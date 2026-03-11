@@ -111,6 +111,50 @@ function TilesCrud() {
     setTile({ ...tile, [e.target.name]: e.target.value });
   };
 
+  const getBackendErrorMessage = (err) => {
+    if (!err) return "Unknown error";
+
+    if (err.response?.data) {
+      const data = err.response.data;
+
+      if (typeof data === "string") {
+        return data;
+      }
+
+      if (typeof data === "object") {
+        return data.message || data.error || JSON.stringify(data);
+      }
+    }
+
+    return err.message || "Request failed";
+  };
+
+  const buildPayload = () => {
+    if (!tile.name || !tile.brand || !tile.size) {
+      alert("Please fill tile name, brand, and size.");
+      return null;
+    }
+
+    if (tile.countOfBoxes === "" || tile.price === "") {
+      alert("Please enter boxes and price.");
+      return null;
+    }
+
+    const countOfBoxes = Number(tile.countOfBoxes);
+    const price = Number(tile.price);
+
+    if (Number.isNaN(countOfBoxes) || Number.isNaN(price)) {
+      alert("Boxes and price must be valid numbers.");
+      return null;
+    }
+
+    return {
+      ...tile,
+      countOfBoxes,
+      price
+    };
+  };
+
   const handleAdminLogin = () => {
     if (adminPassword === ADMIN_PASSWORD) {
       setIsAdmin(true);
@@ -134,18 +178,33 @@ function TilesCrud() {
       return;
     }
 
+    const payload = buildPayload();
+    if (!payload) {
+      return;
+    }
+
     if (isEdit) {
       // 🔁 UPDATE
-      updateTile(tile.id, tile).then(() => {
-        loadTiles();
-        resetForm();
-      });
+      updateTile(tile.id, payload)
+        .then(() => {
+          loadTiles();
+          resetForm();
+          alert("Tile updated successfully.");
+        })
+        .catch((err) => {
+          alert(`Failed to update tile: ${getBackendErrorMessage(err)}`);
+        });
     } else {
       // ➕ ADD
-      addTile(tile).then(() => {
-        loadTiles();
-        resetForm();
-      });
+      addTile(payload)
+        .then(() => {
+          loadTiles();
+          resetForm();
+          alert("Tile added successfully.");
+        })
+        .catch((err) => {
+          alert(`Failed to add tile: ${getBackendErrorMessage(err)}`);
+        });
     }
   };
 
@@ -166,7 +225,14 @@ function TilesCrud() {
       return;
     }
     if (window.confirm("Are you sure you want to delete this item?")) {
-      deleteTile(id).then(() => loadTiles());
+      deleteTile(id)
+        .then(() => {
+          loadTiles();
+          alert("Tile deleted successfully.");
+        })
+        .catch((err) => {
+          alert(`Failed to delete tile: ${getBackendErrorMessage(err)}`);
+        });
     }
   };
 
