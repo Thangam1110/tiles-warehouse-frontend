@@ -172,41 +172,55 @@ function TilesCrud() {
   };
 
   const handleSubmit = () => {
-    if (!isAdmin) {
-      alert("⛔ Admin access required!");
-      setShowLoginModal(true);
+  if (!isAdmin) {
+    alert("⛔ Admin access required!");
+    setShowLoginModal(true);
+    return;
+  }
+
+  const payload = buildPayload();
+  if (!payload) {
+    return;
+  }
+
+  if (isEdit) {
+    // 🔐 Ask password before UPDATE
+    const password = prompt("🔐 Enter admin password to update:");
+
+    if (!password || password.trim() === "") {
+      alert("⚠️ Password is required!");
       return;
     }
 
-    const payload = buildPayload();
-    if (!payload) {
+    if (password !== "admin123") {
+      alert("⛔ Incorrect password!");
       return;
     }
 
-    if (isEdit) {
-      // 🔁 UPDATE
-      updateTile(tile.id, payload)
-        .then(() => {
-          loadTiles();
-          resetForm();
-          alert("Tile updated successfully.");
-        })
-        .catch((err) => {
-          alert(`Failed to update tile: ${getBackendErrorMessage(err)}`);
-        });
-    } else {
-      // ➕ ADD
-      addTile(payload)
-        .then(() => {
-          loadTiles();
-          resetForm();
-          alert("Tile added successfully.");
-        })
-        .catch((err) => {
-          alert(`Failed to add tile: ${getBackendErrorMessage(err)}`);
-        });
-    }
-  };
+    // 🔁 UPDATE
+    updateTile(tile.id, payload)
+      .then(() => {
+        loadTiles();
+        resetForm();
+        alert("✅ Tile updated successfully.");
+      })
+      .catch((err) => {
+        alert(`❌ Failed to update tile:\n${getBackendErrorMessage(err)}`);
+      });
+
+  } else {
+    // ➕ ADD (no password)
+    addTile(payload)
+      .then(() => {
+        loadTiles();
+        resetForm();
+        alert("✅ Tile added successfully.");
+      })
+      .catch((err) => {
+        alert(`❌ Failed to add tile:\n${getBackendErrorMessage(err)}`);
+      });
+  }
+};
 
   const handleEdit = (t) => {
     if (!isAdmin) {
@@ -219,22 +233,34 @@ function TilesCrud() {
   };
 
   const handleDelete = (id) => {
-    if (!isAdmin) {
-      alert("⛔ Admin access required to delete!");
-      setShowLoginModal(true);
-      return;
-    }
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      deleteTile(id)
-        .then(() => {
-          loadTiles();
-          alert("Tile deleted successfully.");
-        })
-        .catch((err) => {
-          alert(`Failed to delete tile: ${getBackendErrorMessage(err)}`);
-        });
-    }
-  };
+  // Ask password before delete
+  const password = prompt("Enter admin password to delete:");
+
+  // If user cancels
+  if (!password) {
+    alert("❌ Password required!");
+    return;
+  }
+
+  // Check password (example: hardcoded)
+  if (password !== "admin123") {
+    alert("⛔ Incorrect password!");
+    return;
+  }
+
+  // Proceed delete
+  if (window.confirm("Are you sure you want to delete this item?")) {
+    deleteTile(id)
+      .then(() => {
+        loadTiles();
+        alert("✅ Tile deleted successfully.");
+      })
+      .catch((err) => {
+        alert(`❌ Failed to delete tile: ${getBackendErrorMessage(err)}`);
+      });
+  }
+};
+
 
   const resetForm = () => {
     setTile({
