@@ -233,33 +233,22 @@ function TilesCrud() {
   };
 
   const handleDelete = (id) => {
-  // Ask password before delete
-  const password = prompt("Enter admin password to delete:");
-
-  // If user cancels
-  if (!password) {
-    alert("❌ Password required!");
-    return;
-  }
-
-  // Check password (example: hardcoded)
-  if (password !== "admin123") {
-    alert("⛔ Incorrect password!");
-    return;
-  }
-
-  // Proceed delete
-  if (window.confirm("Are you sure you want to delete this item?")) {
-    deleteTile(id)
-      .then(() => {
-        loadTiles();
-        alert("✅ Tile deleted successfully.");
-      })
-      .catch((err) => {
-        alert(`❌ Failed to delete tile: ${getBackendErrorMessage(err)}`);
-      });
-  }
-};
+    if (!isAdmin) {
+      alert("⛔ Admin access required to delete!");
+      setShowLoginModal(true);
+      return;
+    }
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      deleteTile(id)
+        .then(() => {
+          loadTiles();
+          alert("Tile deleted successfully.");
+        })
+        .catch((err) => {
+          alert(`Failed to delete tile: ${getBackendErrorMessage(err)}`);
+        });
+    }
+  };
 
 
   const resetForm = () => {
